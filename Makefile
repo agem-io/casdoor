@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-REGISTRY ?= casbin
+REGISTRY ?= imagemio
 IMG ?= casdoor
 IMG_TAG ?=$(shell git --no-pager log -1 --format="%ad" --date=format:"%Y%m%d")-$(shell git describe --tags --always --dirty --abbrev=6)
 NAMESPACE ?= casdoor
@@ -22,7 +22,10 @@ SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
 .PHONY: all
-all: docker-build docker-push deploy
+all: docker-build
+
+.PHONY: docker
+docker: docker-build docker-push
 
 ##@ General
 
@@ -75,7 +78,7 @@ vendor: ## Update vendor.
 	go mod vendor
 
 .PHONY: run
-run: fmt vet ## Run backend in local 
+run: fmt vet ## Run backend in local
 	go run ./main.go
 
 .PHONY: docker-build
@@ -111,3 +114,5 @@ dry-run: ## Dry run for helm install
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	helm delete ${APP} -n ${NAMESPACE}
+
+
